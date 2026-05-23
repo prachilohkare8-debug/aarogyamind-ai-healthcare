@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+
+    <title>Disease List</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+
+</head>
+
+<body class="bg-slate-100 p-10">
+
+    <h1 class="text-4xl font-bold mb-8">
+
+        Disease List
+
+    </h1>
+
+    <div class="grid grid-cols-3 gap-4">
+
+        {% for disease in diseases %}
+
+        <div class="bg-white p-4 rounded-xl shadow">
+
+            {{ disease }}
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+</body>
+</html>

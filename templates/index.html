@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI Healthcare — Disease Prediction System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter','sans-serif'] },
+          colors: {
+            primary: '#3b82f6',
+            primaryd: '#2563eb',
+            green: '#22c55e',
+            red: '#ef4444',
+            amber: '#f59e0b',
+            critical: '#ef4444',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing:border-box; }
+    body { background:#f8fafc; font-family:'Inter',sans-serif; color:#1e293b; }
+
+    .topbar { background:#fff; border-bottom:1px solid #e2e8f0; }
+    .nav-btn { font-size:.875rem; font-weight:500; color:#64748b; padding:6px 16px; border-radius:8px; transition:all .15s; border:none; background:none; cursor:pointer; }
+    .nav-btn:hover { background:#f1f5f9; color:#1e293b; }
+    .nav-btn.active { background:#eff6ff; color:#3b82f6; font-weight:600; border:1px solid #bfdbfe; }
+    .nav-cta { background:#3b82f6; color:#fff; font-size:.875rem; font-weight:600; padding:8px 18px; border-radius:8px; border:none; cursor:pointer; display:flex;align-items:center;gap:6px;transition:background .15s; }
+    .nav-cta:hover { background:#2563eb; }
+
+    .disclaimer-bar { background:#fffbeb; border:1px solid #fde68a; border-radius:10px; padding:12px 18px; display:flex;align-items:center;gap:10px; font-size:.875rem; color:#92400e; margin-bottom:20px; }
+
+    .section-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; overflow:hidden; }
+    .section-title { font-size:1.25rem; font-weight:700; color:#1e293b; margin-bottom:16px; }
+
+    /* Search input */
+    .search-wrap { position:relative; margin-bottom:14px; }
+    .search-wrap svg { position:absolute; left:11px; top:50%; transform:translateY(-50%); color:#94a3b8; pointer-events:none; }
+    .search-input { width:100%; border:1px solid #e2e8f0; border-radius:8px; padding:9px 12px 9px 36px; font-size:.875rem; color:#1e293b; background:#f8fafc; font-family:'Inter',sans-serif; outline:none; transition:border .15s; }
+    .search-input:focus { border-color:#93c5fd; box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+
+    /* Symptom chip grid */
+    .chip-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:8px; max-height:280px; overflow-y:auto; padding-right:4px; }
+    .chip-grid::-webkit-scrollbar { width:4px; }
+    .chip-grid::-webkit-scrollbar-track { background:transparent; }
+    .chip-grid::-webkit-scrollbar-thumb { background:#cbd5e1; border-radius:99px; }
+
+    .sym-chip { display:flex;align-items:center;gap:6px; padding:8px 12px; border:1px solid #e2e8f0; border-radius:8px; font-size:.8125rem; color:#475569; background:#fff; cursor:pointer; transition:all .15s; user-select:none; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+    .sym-chip:hover { border-color:#93c5fd; background:#eff6ff; color:#3b82f6; }
+    .sym-chip.selected { border-color:#3b82f6; background:#eff6ff; color:#3b82f6; font-weight:500; }
+    .sym-chip .plus { font-size:.9rem; font-weight:600; color:#94a3b8; flex-shrink:0; }
+    .sym-chip.selected .plus { color:#3b82f6; }
+
+    /* Selected strip */
+    .sel-bar { display:flex; align-items:center; justify-content:space-between; padding:10px 0 0; border-top:1px solid #f1f5f9; margin-top:12px; }
+    .sel-count { font-size:.875rem; color:#64748b; }
+    .sel-count strong { color:#1e293b; font-weight:700; }
+    .clear-btn { font-size:.8125rem; color:#94a3b8; background:none; border:none; cursor:pointer; }
+    .clear-btn:hover { color:#3b82f6; }
+    .sel-tags { display:flex; flex-wrap:wrap; gap:6px; margin:10px 0; min-height:28px; }
+    .sel-tag { background:#eff6ff; border:1px solid #bfdbfe; color:#3b82f6; font-size:.75rem; font-weight:500; padding:3px 10px; border-radius:99px; }
+
+    .analyse-btn { width:100%; padding:13px; background:#3b82f6; color:#fff; font-size:.9375rem; font-weight:600; border:none; border-radius:8px; cursor:pointer; display:flex;align-items:center;justify-content:center;gap:8px; transition:background .15s;margin-top:14px; }
+    .analyse-btn:hover { background:#2563eb; }
+    .analyse-btn:disabled { opacity:.6; cursor:not-allowed; }
+
+    /* Results */
+    .pred-header { font-size:1rem; font-weight:700; color:#1e293b; margin-bottom:16px; }
+    .pred-card { border:1px solid #e2e8f0; border-radius:10px; padding:16px; margin-bottom:10px; background:#fff; transition:border .15s; }
+    .pred-card:hover { border-color:#93c5fd; }
+    .pred-card.top { border-color:#3b82f6; }
+    .pred-name { font-size:1rem; font-weight:700; color:#1e293b; margin-bottom:2px; }
+    .pred-meta { font-size:.75rem; color:#94a3b8; margin-bottom:10px; }
+    .pred-bar-track { background:#f1f5f9; border-radius:99px; height:5px; margin-bottom:10px; overflow:hidden; }
+    .pred-bar-fill { height:100%; background:#3b82f6; border-radius:99px; transition:width 1s cubic-bezier(.22,1,.36,1); }
+    .pred-tags { display:flex; gap:6px; flex-wrap:wrap; margin-bottom:8px; }
+    .badge { display:inline-flex; align-items:center; font-size:.7rem; font-weight:700; padding:3px 10px; border-radius:99px; }
+    .badge-rank { background:#f1f5f9; color:#64748b; }
+    .badge-mild { background:#dcfce7; color:#16a34a; }
+    .badge-moderate { background:#fef9c3; color:#a16207; }
+    .badge-critical { background:#fee2e2; color:#dc2626; }
+    .badge-age { background:#f1f5f9; color:#64748b; }
+    .pred-tip { font-size:.8125rem; color:#64748b; }
+    .critical-alert { background:#fee2e2; border:1px solid #fca5a5; border-radius:8px; padding:10px 14px; display:flex;align-items:center;gap:8px; font-size:.8125rem; font-weight:600; color:#dc2626; margin-top:10px; }
+    .confidence-num { font-size:1.5rem; font-weight:800; color:#3b82f6; }
+
+    .empty-state { display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 20px;color:#94a3b8;text-align:center;gap:12px; }
+    .empty-state svg { color:#cbd5e1; }
+
+    .skeleton { background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; }
+    @keyframes shimmer { to { background-position:-200% 0; } }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes fadeUp { 0%{opacity:0;transform:translateY(16px)} 100%{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-xl">🩺</span>
+      <div>
+        <div class="font-bold text-sm text-slate-800 leading-tight">AI Healthcare — Disease Prediction System</div>
+        <div class="text-xs text-slate-400">54 diseases · 265 symptoms · Random Forest · MIT Academy of Engineering, Pune</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <a href="/" class="nav-btn active">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;vertical-align:-1px"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.04 2.5 2.5 0 0 1 3-3"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.04 2.5 2.5 0 0 0-3-3"/></svg>
+        Symptom Checker
+      </a>
+      <a href="/dashboard" class="nav-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;vertical-align:-1px"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Dashboard
+      </a>
+      <a href="/chatbot" class="nav-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;vertical-align:-1px"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        AI Chatbot
+      </a>
+      <a href="/diseases" class="nav-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="display:inline;margin-right:4px;vertical-align:-1px"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Disease List
+      </a>
+    </div>
+  </div>
+</header>
+
+<!-- MAIN -->
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+  <!-- Disclaimer -->
+  <div class="disclaimer-bar">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <span><strong>Disclaimer:</strong> For general health awareness only. Not a substitute for professional medical diagnosis. Always consult a qualified doctor.</span>
+  </div>
+
+  <!-- Two-column layout -->
+  <div class="grid lg:grid-cols-[1fr_400px] gap-6">
+
+    <!-- LEFT: Symptom selector -->
+    <div class="section-card p-6">
+      <h2 class="section-title">Select your symptoms</h2>
+
+      <!-- Search -->
+      <div class="search-wrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input type="text" id="symptom-filter" class="search-input" placeholder="Search 265 symptoms..." oninput="filterSymptoms(this.value)">
+      </div>
+
+      <!-- Chip grid -->
+      <div class="chip-grid" id="chip-cloud">
+        {% for symptom in symptoms %}
+        <div class="sym-chip" id="chip-{{ loop.index }}" onclick="toggleChip(this, '{{ symptom }}')">
+          <span class="plus">+</span>
+          <span>{{ symptom }}</span>
+          <input type="checkbox" class="symptom-checkbox hidden" value="{{ symptom }}">
+        </div>
+        {% endfor %}
+      </div>
+
+      <!-- Bottom bar -->
+      <div class="sel-bar">
+        <span class="sel-count">Selected: <strong id="sel-num">0</strong></span>
+        <button class="clear-btn" onclick="clearAll()">Clear all</button>
+      </div>
+
+      <!-- Selected tags -->
+      <div class="sel-tags" id="sel-tags">
+        <span style="color:#94a3b8;font-size:.8125rem;">No symptoms selected yet</span>
+      </div>
+
+      <!-- Analyse button -->
+      <button id="predict-btn" class="analyse-btn" onclick="predict()">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.04 2.5 2.5 0 0 1 3-3"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.04 2.5 2.5 0 0 0-3-3"/></svg>
+        Analyse Symptoms
+      </button>
+    </div>
+
+    <!-- RIGHT: Results -->
+    <div class="section-card p-6" id="result-panel">
+      <div class="empty-state" id="result-placeholder">
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.04 2.5 2.5 0 0 1 3-3"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.04 2.5 2.5 0 0 0-3-3"/></svg>
+        <p style="font-size:.875rem;line-height:1.6;">Select symptoms on the left<br>then click <strong style="color:#1e293b;">Analyse Symptoms</strong></p>
+      </div>
+      <div id="result-section" class="hidden"></div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+  const selected = new Set();
+
+  function toggleChip(el, symptom) {
+    const cb = el.querySelector('input');
+    cb.checked = !cb.checked;
+    el.classList.toggle('selected', cb.checked);
+    const plus = el.querySelector('.plus');
+    if (cb.checked) { selected.add(symptom); plus.textContent = '✓'; }
+    else { selected.delete(symptom); plus.textContent = '+'; }
+    updateSelBar();
+  }
+
+  function updateSelBar() {
+    document.getElementById('sel-num').textContent = selected.size;
+    const tagsEl = document.getElementById('sel-tags');
+    if (selected.size === 0) {
+      tagsEl.innerHTML = '<span style="color:#94a3b8;font-size:.8125rem;">No symptoms selected yet</span>';
+    } else {
+      tagsEl.innerHTML = [...selected].map(s => `<span class="sel-tag">${s}</span>`).join('');
+    }
+  }
+
+  function clearAll() {
+    selected.clear();
+    document.querySelectorAll('.sym-chip').forEach(c => {
+      c.classList.remove('selected');
+      c.querySelector('input').checked = false;
+      c.querySelector('.plus').textContent = '+';
+    });
+    document.getElementById('symptom-filter').value = '';
+    filterSymptoms('');
+    updateSelBar();
+  }
+
+  function filterSymptoms(val) {
+    const q = val.toLowerCase().trim();
+    document.querySelectorAll('.sym-chip').forEach(chip => {
+      const label = chip.querySelector('span:last-child').textContent.toLowerCase();
+      chip.style.display = (!q || label.includes(q)) ? '' : 'none';
+    });
+  }
+
+  async function predict() {
+    const symptoms = [...selected];
+    if (!symptoms.length) { alert('Please select at least one symptom.'); return; }
+
+    const btn = document.getElementById('predict-btn');
+    btn.innerHTML = `<svg width="16" height="16" style="animation:spin .7s linear infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Analysing…`;
+    btn.disabled = true;
+
+    const rp = document.getElementById('result-placeholder');
+    const rs = document.getElementById('result-section');
+    rp.style.display = 'none';
+    rs.classList.remove('hidden');
+    rs.innerHTML = `<div class="flex flex-col gap-3">
+      <div class="skeleton h-5 w-40 mb-2"></div>
+      <div class="skeleton h-20 rounded-xl"></div>
+      <div class="skeleton h-16 rounded-xl"></div>
+      <div class="skeleton h-16 rounded-xl"></div>
+    </div>`;
+
+    try {
+      const res  = await fetch('/predict', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({symptoms}) });
+      const data = await res.json();
+      localStorage.setItem(
+    "predictionData",
+    JSON.stringify(data)
+);
+      if (data.error) { alert(data.error); rs.classList.add('hidden'); rp.style.display='flex'; return; }
+
+      const severityBadge = s => {
+        if (!s) return '';
+        const l = s.toLowerCase();
+        if (l === 'mild') return `<span class="badge badge-mild">Mild</span>`;
+        if (l === 'moderate') return `<span class="badge badge-moderate">Moderate</span>`;
+        if (l === 'critical' || l === 'severe') return `<span class="badge badge-critical">Critical</span>`;
+        return `<span class="badge badge-mild">${s}</span>`;
+      };
+
+      const matched = symptoms.length;
+      rs.innerHTML = `<p class="pred-header">Top predictions (${matched} symptom${matched!==1?'s':''} matched)</p>` +
+        data.top_predictions.map((p, i) => `
+          <div class="pred-card ${i===0?'top':''}" style="animation:fadeUp .4s ease ${.05+i*.08}s both;">
+            <div style="display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:4px;">
+              <div>
+                <div class="pred-name">${p.disease}</div>
+                <div class="pred-meta">${p.icd||'ICD-10'} · ${p.category||'General'}</div>
+              </div>
+              <div class="confidence-num">${p.confidence}%<div style="font-size:.7rem;font-weight:500;color:#94a3b8;text-align:right;">confidence</div></div>
+            </div>
+            <div class="pred-bar-track"><div class="pred-bar-fill" style="width:${p.confidence}%"></div></div>
+            <div class="pred-tags">
+              <span class="badge badge-rank">#${i+1}</span>
+              ${severityBadge(p.severity)}
+              ${p.age_group?`<span class="badge badge-age">${p.age_group}</span>`:''}
+            </div>
+            <div class="pred-tip">${p.treatment||''}</div>
+            ${p.severity && (p.severity.toLowerCase()==='critical'||p.severity.toLowerCase()==='severe') ? `<div class="critical-alert"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="flex-shrink:0"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Critical condition — seek emergency medical care immediately. Call 112.</div>` : ''}
+          </div>`).join('') +
+        `<div style="display:flex;gap:10px;margin-top:6px;">
+          <a href="/precautions/${data.prediction.disease}" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;background:#3b82f6;color:#fff;font-weight:600;font-size:.875rem;border-radius:8px;text-decoration:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            View Care Plan
+          </a>
+          <a href="/dashboard" style="flex:1;display:flex;align-items:center;justify-content:center;gap:7px;padding:11px;background:#f8fafc;border:1px solid #e2e8f0;color:#475569;font-weight:600;font-size:.875rem;border-radius:8px;text-decoration:none;">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+            Dashboard
+          </a>
+        </div>`;
+    } catch(e) {
+      console.error(e); alert('Prediction failed. Please try again.');
+      rs.classList.add('hidden'); rp.style.display='flex';
+    } finally {
+      btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.04 2.5 2.5 0 0 1 3-3"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.04 2.5 2.5 0 0 0-3-3"/></svg> Analyse Symptoms`;
+      btn.disabled = false;
+    }
+  }
+</script>
+</body>
+</html>x

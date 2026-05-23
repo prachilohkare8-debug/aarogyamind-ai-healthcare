@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Health Dashboard — AI Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing:border-box; }
+    body { background:#f8fafc; font-family:'Inter',sans-serif; color:#1e293b; }
+
+    .topbar { background:#fff; border-bottom:1px solid #e2e8f0; }
+    .nav-btn { font-size:.875rem; font-weight:500; color:#64748b; padding:6px 16px; border-radius:8px; transition:all .15s; border:none; background:none; cursor:pointer; text-decoration:none; display:inline-flex;align-items:center;gap:5px; }
+    .nav-btn:hover { background:#f1f5f9; color:#1e293b; }
+    .nav-btn.active { background:#eff6ff; color:#3b82f6; font-weight:600; border:1px solid #bfdbfe; }
+    .nav-cta { background:#3b82f6; color:#fff; font-size:.875rem; font-weight:600; padding:8px 18px; border-radius:8px; border:none; cursor:pointer; display:inline-flex;align-items:center;gap:6px;transition:background .15s;text-decoration:none; }
+    .nav-cta:hover { background:#2563eb; }
+
+    .section-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:24px; }
+    .card-title { font-size:1rem; font-weight:700; color:#1e293b; margin-bottom:16px; }
+    .stat-num { font-size:2rem; font-weight:800; color:#1e293b; line-height:1; }
+    .stat-label { font-size:.75rem; color:#94a3b8; margin-top:4px; }
+
+    /* Ring */
+    .ring-bg { fill:none; stroke:#f1f5f9; stroke-width:10; }
+    .ring-fill { fill:none; stroke:url(#scoreGrad); stroke-width:10; stroke-linecap:round; transform-origin:center; transform:rotate(-90deg); }
+
+    /* Progress bar */
+    .prog-track { background:#f1f5f9; border-radius:99px; height:8px; overflow:hidden; }
+    .prog-fill { height:100%; background:#3b82f6; border-radius:99px; transition:width 1s cubic-bezier(.22,1,.36,1); }
+    .prog-fill-green { height:100%; background:#22c55e; border-radius:99px; }
+
+    /* Bar chart */
+    .bar { background:linear-gradient(180deg,#3b82f6,#6ee7b7); border-radius:4px 4px 0 0; min-height:4px; animation:barGrow .8s cubic-bezier(.22,1,.36,1) both; transform-origin:bottom; }
+    @keyframes barGrow { from{transform:scaleY(0)} to{transform:scaleY(1)} }
+
+    /* Donut */
+    .donut-circle { fill:none; stroke-width:14; stroke-linecap:round; transform-origin:center; transform:rotate(-90deg); }
+
+    /* Discriminating sym */
+    .sym-row { display:flex;align-items:center;justify-content:space-between; padding:8px 0; border-bottom:1px solid #f1f5f9; }
+    .sym-row:last-child { border-bottom:none; }
+    .sym-bar-track { width:60px; height:7px; background:#f1f5f9; border-radius:99px; overflow:hidden; margin:0 10px; }
+    .sym-bar-fill { height:100%; background:#22c55e; border-radius:99px; }
+
+    /* Category dot */
+    .cat-dot { width:9px; height:9px; border-radius:50%; display:inline-block; margin-right:7px; }
+
+    /* BMI input */
+    .bmi-input { border:1px solid #e2e8f0; border-radius:8px; padding:9px 12px; font-size:.875rem; font-family:'Inter',sans-serif; color:#1e293b; background:#f8fafc; outline:none; transition:border .15s; width:100%; }
+    .bmi-input:focus { border-color:#93c5fd; box-shadow:0 0 0 3px rgba(59,130,246,.1); }
+    .bmi-btn { width:100%; padding:11px; background:#3b82f6; color:#fff; font-size:.875rem; font-weight:600; border:none; border-radius:8px; cursor:pointer; display:flex;align-items:center;justify-content:center;gap:7px; transition:background .15s; margin-top:12px; }
+    .bmi-btn:hover { background:#2563eb; }
+    .bmi-btn:disabled { opacity:.6; cursor:not-allowed; }
+
+    .skeleton { background:linear-gradient(90deg,#f1f5f9 25%,#e2e8f0 50%,#f1f5f9 75%); background-size:200% 100%; animation:shimmer 1.4s infinite; border-radius:6px; }
+    @keyframes shimmer { to { background-position:-200% 0; } }
+    @keyframes spin { to { transform:rotate(360deg); } }
+    @keyframes fadeUp { 0%{opacity:0;transform:translateY(14px)} 100%{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-xl">🩺</span>
+      <div>
+        <div class="font-bold text-sm text-slate-800 leading-tight">AI Healthcare — Disease Prediction System</div>
+        <div class="text-xs text-slate-400">54 diseases · 265 symptoms · Random Forest · MIT Academy of Engineering, Pune</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <a href="/" class="nav-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.04 2.5 2.5 0 0 1 3-3"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.04 2.5 2.5 0 0 0-3-3"/></svg>
+        Symptom Checker
+      </a>
+      <a href="/dashboard" class="nav-btn active">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Dashboard
+      </a>
+      <a href="/chatbot" class="nav-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        AI Chatbot
+      </a>
+      <a href="/diseases" class="nav-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Disease List
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-7xl mx-auto px-6 py-8">
+
+  <!-- Page header -->
+  <h1 style="font-size:1.5rem;font-weight:800;color:#1e293b;margin-bottom:24px;">Health dashboard</h1>
+
+  <!-- Top 4 stat cards -->
+  <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+    <div class="section-card" style="padding:20px;">
+      <div style="font-size:1.6rem;font-weight:800;color:#1e293b;" id="topDiag">Irritable Bowel Syndrome</div>
+      <div class="stat-label">Top prediction</div>
+    </div>
+    <div class="section-card" style="padding:20px;">
+      <div class="stat-num" id="confScore">27%</div>
+      <div class="stat-label">Confidence score</div>
+    </div>
+    <div class="section-card" style="padding:20px;">
+      <div class="stat-num">54</div>
+      <div class="stat-label">Disease classes</div>
+    </div>
+    <div class="section-card" style="padding:20px;">
+      <div class="stat-num">277</div>
+      <div class="stat-label">Symptom features</div>
+    </div>
+  </div>
+
+  <!-- Middle row: Prediction confidence + Top discriminating symptoms -->
+  <div class="grid lg:grid-cols-2 gap-4 mb-6">
+
+    <!-- Prediction confidence -->
+    <div class="section-card">
+      <div class="card-title">Prediction confidence</div>
+      <div id="conf-bars">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+    <!-- Top discriminating symptoms -->
+    <div class="section-card">
+      <div class="card-title">Top discriminating symptoms</div>
+      <div id="disc-syms">
+        <!-- Populated by JS -->
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Disease category coverage -->
+  <div class="section-card mb-6">
+    <div class="card-title">Disease category coverage</div>
+    <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3" id="cat-grid">
+      <!-- Populated by JS -->
+    </div>
+  </div>
+
+  <!-- BMI Calculator -->
+  <div class="section-card">
+    <div class="card-title">BMI Calculator & Meal Plan</div>
+    <div class="grid md:grid-cols-2 gap-6">
+      <div>
+        <label style="font-size:.8125rem;font-weight:600;color:#64748b;display:block;margin-bottom:6px;">Weight (kg)</label>
+        <input type="number" id="weight" class="bmi-input" placeholder="e.g. 70">
+        <label style="font-size:.8125rem;font-weight:600;color:#64748b;display:block;margin-bottom:6px;margin-top:12px;">Height (cm)</label>
+        <input type="number" id="height" class="bmi-input" placeholder="e.g. 170">
+        <button class="bmi-btn" id="bmi-btn" onclick="calcBMI()">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          Calculate BMI
+        </button>
+      </div>
+      <div id="bmi-result-area">
+        <div style="display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;gap:10px;color:#94a3b8;text-align:center;padding:20px 0;">
+          <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+          <p style="font-size:.8125rem;">Enter your measurements<br>to calculate BMI and meal plan.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+
+const storedData =
+JSON.parse(
+    localStorage.getItem(
+        "predictionData"
+    )
+);
+
+let topPreds = [];
+
+if(storedData){
+
+    document.getElementById(
+        "topDiag"
+    ).innerText =
+
+    storedData.prediction.disease;
+
+    document.getElementById(
+        "confScore"
+    ).innerText =
+
+    storedData.prediction.confidence + "%";
+
+    topPreds =
+    storedData.top_predictions.map(item => ({
+        name: item.disease,
+        conf: item.confidence
+    }));
+
+}else{
+
+    topPreds = [
+        {
+            name:"No Prediction",
+            conf:0
+        }
+    ];
+}
+document.getElementById('conf-bars').innerHTML = topPreds.map((p,i) => `
+  <div style="display:flex;align-items:center;gap:10px;margin-bottom:10px;">
+    <span style="font-size:.8125rem;color:#475569;flex:0 0 170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${p.name.length>22?p.name.slice(0,22)+'…':p.name}</span>
+    <div class="prog-track" style="flex:1">
+      <div class="prog-fill" style="width:${p.conf}%;background:${i===0?'#3b82f6':'#93c5fd'}"></div>
+    </div>
+    <span style="font-size:.8125rem;font-weight:700;color:#1e293b;min-width:34px;text-align:right;">${p.conf}%</span>
+  </div>`).join('');
+
+// Discriminating symptoms
+const discSyms = [
+  { name:'nosebleed', pct:1.12 },
+  { name:'pain after fatty meals', pct:1.10 },
+  { name:'guarding', pct:1.00 },
+  { name:'diarrhoea', pct:0.99 },
+  { name:'mild cough', pct:0.98 },
+];
+const maxPct = Math.max(...discSyms.map(s=>s.pct));
+document.getElementById('disc-syms').innerHTML = discSyms.map(s => `
+  <div class="sym-row">
+    <span style="font-size:.8125rem;color:#475569;">${s.name}</span>
+    <div style="display:flex;align-items:center;gap:10px;">
+      <div class="sym-bar-track"><div class="sym-bar-fill" style="width:${Math.round((s.pct/maxPct)*100)}%"></div></div>
+      <span style="font-size:.8125rem;font-weight:700;color:#1e293b;min-width:38px;text-align:right;">${s.pct.toFixed(2)}%</span>
+    </div>
+  </div>`).join('');
+
+// Categories
+const cats = [
+  { name:'Cardiovascular', count:6, color:'#22c55e' },
+  { name:'Dermatology', count:2, color:'#3b82f6' },
+  { name:'Endocrine', count:5, color:'#f97316' },
+  { name:'Gastrointestinal', count:7, color:'#ec4899' },
+  { name:'Infectious Disease', count:6, color:'#f59e0b' },
+  { name:'Mental Health', count:4, color:'#22c55e' },
+  { name:'Musculoskeletal', count:4, color:'#a855f7' },
+  { name:'Neurological', count:5, color:'#ef4444' },
+  { name:'Oncology', count:3, color:'#22c55e' },
+  { name:'Renal', count:3, color:'#f97316' },
+  { name:'Respiratory', count:5, color:'#3b82f6' },
+  { name:'Reproductive', count:3, color:'#ec4899' },
+];
+document.getElementById('cat-grid').innerHTML = cats.map(c => `
+  <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 0;">
+    <span style="font-size:.875rem;color:#475569;display:flex;align-items:center;">
+      <span class="cat-dot" style="background:${c.color}"></span>${c.name}
+    </span>
+    <span style="font-size:.875rem;font-weight:700;color:#1e293b;">${c.count} diseases</span>
+  </div>`).join('');
+
+// BMI
+async function calcBMI() {
+  const weight = document.getElementById('weight').value;
+  const height = document.getElementById('height').value;
+  if (!weight || !height) { alert('Enter both weight and height.'); return; }
+
+  const btn = document.getElementById('bmi-btn');
+  btn.innerHTML = `<svg width="15" height="15" style="animation:spin .7s linear infinite" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg> Calculating…`;
+  btn.disabled = true;
+
+  const resultArea = document.getElementById('bmi-result-area');
+  resultArea.innerHTML = `<div class="flex flex-col gap-3 pt-2"><div class="skeleton h-12 w-36"></div><div class="skeleton h-4 w-48"></div><div class="grid grid-cols-3 gap-2 mt-2"><div class="skeleton h-16 rounded-xl"></div><div class="skeleton h-16 rounded-xl"></div><div class="skeleton h-16 rounded-xl"></div></div></div>`;
+
+  try {
+    const res  = await fetch('/calculate_bmi', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({weight, height}) });
+    const data = await res.json();
+    const colorMap = {
+      Underweight: {t:'#3b82f6',bg:'#eff6ff',bd:'#bfdbfe'},
+      Normal:      {t:'#16a34a',bg:'#dcfce7',bd:'#86efac'},
+      Overweight:  {t:'#d97706',bg:'#fef9c3',bd:'#fde68a'},
+      Obese:       {t:'#dc2626',bg:'#fee2e2',bd:'#fca5a5'},
+    };
+    const c = colorMap[data.category] || colorMap.Normal;
+    resultArea.innerHTML = `
+      <div style="animation:fadeUp .4s ease both;">
+        <div style="display:flex;align-items:flex-end;gap:10px;margin-bottom:4px;">
+          <span style="font-size:2.5rem;font-weight:800;color:#1e293b;">${data.bmi}</span>
+          <span style="padding:4px 12px;border-radius:99px;font-size:.8125rem;font-weight:700;color:${c.t};background:${c.bg};border:1px solid ${c.bd};margin-bottom:6px;">${data.category}</span>
+        </div>
+        <p style="font-size:.75rem;color:#94a3b8;margin-bottom:16px;">Based on ${weight} kg / ${height} cm</p>
+        <p style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#94a3b8;margin-bottom:8px;">Recommended Meal Plan</p>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;">
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;">
+            <p style="font-size:.7rem;font-weight:700;color:#94a3b8;margin-bottom:4px;">Breakfast</p>
+            <p style="font-size:.75rem;color:#475569;line-height:1.5;">${data.meal_plan.breakfast}</p>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;">
+            <p style="font-size:.7rem;font-weight:700;color:#94a3b8;margin-bottom:4px;">Lunch</p>
+            <p style="font-size:.75rem;color:#475569;line-height:1.5;">${data.meal_plan.lunch}</p>
+          </div>
+          <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:10px;">
+            <p style="font-size:.7rem;font-weight:700;color:#94a3b8;margin-bottom:4px;">Dinner</p>
+            <p style="font-size:.75rem;color:#475569;line-height:1.5;">${data.meal_plan.dinner}</p>
+          </div>
+        </div>
+      </div>`;
+  } catch(e) {
+    console.error(e); alert('Calculation failed.');
+    resultArea.innerHTML = '<p style="color:#ef4444;font-size:.875rem;">Error calculating. Try again.</p>';
+  } finally {
+    btn.innerHTML = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg> Calculate BMI`;
+    btn.disabled = false;
+  }
+}
+</script>
+</body>
+</html>

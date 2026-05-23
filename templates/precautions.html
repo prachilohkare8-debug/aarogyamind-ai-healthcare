@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{{ disease }} — Precautions · AI Healthcare</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing:border-box; }
+    body { background:#f8fafc; font-family:'Inter',sans-serif; color:#1e293b; }
+
+    .topbar { background:#fff; border-bottom:1px solid #e2e8f0; }
+    .nav-btn { font-size:.875rem; font-weight:500; color:#64748b; padding:6px 16px; border-radius:8px; transition:all .15s; border:none; background:none; cursor:pointer; text-decoration:none; display:inline-flex;align-items:center;gap:5px; }
+    .nav-btn:hover { background:#f1f5f9; color:#1e293b; }
+    .nav-btn.active { background:#eff6ff; color:#3b82f6; font-weight:600; border:1px solid #bfdbfe; }
+
+    .section-card { background:#fff; border:1px solid #e2e8f0; border-radius:12px; padding:24px; margin-bottom:16px; }
+    .card-title { font-size:1rem; font-weight:700; color:#1e293b; display:flex; align-items:center; gap:10px; margin-bottom:16px; }
+
+    .list-item { display:flex;align-items:flex-start;gap:10px;padding:12px 14px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;font-size:.875rem;color:#475569;line-height:1.6;margin-bottom:8px; }
+    .list-icon { width:20px;height:20px;border-radius:50%;display:flex;align-items:center;justify-content:center;flex-shrink:0;margin-top:1px; }
+    .list-icon-green { background:#dcfce7;border:1px solid #86efac; }
+    .list-icon-red { background:#fee2e2;border:1px solid #fca5a5; }
+    .list-icon-blue { background:#eff6ff;border:1px solid #bfdbfe; }
+
+    .stat-mini { background:#fff;border:1px solid #e2e8f0;border-radius:10px;padding:14px 18px;display:flex;align-items:center;gap:12px; }
+    .stat-mini-icon { width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0; }
+
+    .badge { display:inline-flex;align-items:center;font-size:.75rem;font-weight:600;padding:3px 10px;border-radius:99px; }
+    .badge-green { background:#dcfce7;color:#16a34a;border:1px solid #86efac; }
+    .badge-red { background:#fee2e2;color:#dc2626;border:1px solid #fca5a5; }
+    .badge-blue { background:#eff6ff;color:#3b82f6;border:1px solid #bfdbfe; }
+
+    .disclaimer { background:#fffbeb;border:1px solid #fde68a;border-radius:10px;padding:14px 18px;display:flex;align-items:flex-start;gap:10px;font-size:.875rem;color:#92400e; margin-bottom:16px; }
+
+    .btn-primary { background:#3b82f6;color:#fff;font-weight:600;font-size:.875rem;padding:11px 24px;border-radius:8px;border:none;cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-decoration:none;transition:background .15s; }
+    .btn-primary:hover { background:#2563eb; }
+    .btn-ghost { background:#fff;color:#475569;font-weight:600;font-size:.875rem;padding:11px 24px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;display:inline-flex;align-items:center;gap:7px;text-decoration:none;transition:all .15s; }
+    .btn-ghost:hover { background:#f8fafc; }
+
+    .back-link { display:inline-flex;align-items:center;gap:6px;font-size:.875rem;font-weight:500;color:#64748b;text-decoration:none;margin-bottom:20px;transition:color .15s; }
+    .back-link:hover { color:#3b82f6; }
+
+    @keyframes fadeUp { 0%{opacity:0;transform:translateY(14px)} 100%{opacity:1;transform:translateY(0)} }
+  </style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<header class="topbar sticky top-0 z-50">
+  <div class="max-w-7xl mx-auto px-6 h-14 flex items-center justify-between">
+    <div class="flex items-center gap-3">
+      <span class="text-xl">🩺</span>
+      <div>
+        <div class="font-bold text-sm text-slate-800 leading-tight">AI Healthcare — Disease Prediction System</div>
+        <div class="text-xs text-slate-400">54 diseases · 265 symptoms · Random Forest · MIT Academy of Engineering, Pune</div>
+      </div>
+    </div>
+    <div class="flex items-center gap-1">
+      <a href="/" class="nav-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.04 2.5 2.5 0 0 1 3-3"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.04 2.5 2.5 0 0 0-3-3"/></svg>
+        Symptom Checker
+      </a>
+      <a href="/dashboard" class="nav-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+        Dashboard
+      </a>
+      <a href="/chatbot" class="nav-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+        AI Chatbot
+      </a>
+      <a href="/diseases" class="nav-btn">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></svg>
+        Disease List
+      </a>
+    </div>
+  </div>
+</header>
+
+<main class="max-w-4xl mx-auto px-6 py-8">
+
+  <!-- Back -->
+  <a href="/" class="back-link">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Back to Symptom Checker
+  </a>
+
+  <!-- Page header -->
+  <div style="margin-bottom:24px;animation:fadeUp .4s ease both;">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:6px;flex-wrap:wrap;">
+      <div style="width:44px;height:44px;background:#eff6ff;border:1px solid #bfdbfe;border-radius:10px;display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      </div>
+      <h1 style="font-size:1.75rem;font-weight:800;color:#1e293b;">{{ disease }}</h1>
+      <span class="badge badge-blue">Care Plan</span>
+    </div>
+    <p style="font-size:.875rem;color:#94a3b8;margin-left:56px;">Evidence-based recommendations to help you manage and recover effectively.</p>
+  </div>
+
+  <!-- Quick stats -->
+  <div class="grid grid-cols-3 gap-3 mb-4" style="animation:fadeUp .4s ease .05s both;">
+    <div class="stat-mini">
+      <div class="stat-mini-icon" style="background:#dcfce7;border:1px solid #86efac;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0 0 4h1l1 9a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-9h1a2 2 0 0 0 0-4h-5V4a2 2 0 0 0-2-2z"/></svg>
+      </div>
+      <div>
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;">Foods</div>
+        <div style="font-weight:700;color:#1e293b;">{{ data.foods | length }} items</div>
+      </div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini-icon" style="background:#fee2e2;border:1px solid #fca5a5;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+      </div>
+      <div>
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;">Avoid</div>
+        <div style="font-weight:700;color:#1e293b;">{{ data.avoid | length }} items</div>
+      </div>
+    </div>
+    <div class="stat-mini">
+      <div class="stat-mini-icon" style="background:#eff6ff;border:1px solid #bfdbfe;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      <div>
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:#94a3b8;">Tips</div>
+        <div style="font-weight:700;color:#1e293b;">{{ data.tips | length }} items</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recommended Foods -->
+  <div class="section-card" style="animation:fadeUp .4s ease .1s both;">
+    <div class="card-title">
+      <div class="stat-mini-icon" style="background:#dcfce7;border:1px solid #86efac;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 2a2 2 0 0 0-2 2v5H4a2 2 0 0 0 0 4h1l1 9a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1l1-9h1a2 2 0 0 0 0-4h-5V4a2 2 0 0 0-2-2z"/></svg>
+      </div>
+      Recommended Foods
+      <span class="badge badge-green" style="margin-left:auto;">Beneficial</span>
+    </div>
+    {% for food in data.foods %}
+    <div class="list-item">
+      <div class="list-icon list-icon-green">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+      </div>
+      {{ food }}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Things to Avoid -->
+  <div class="section-card" style="animation:fadeUp .4s ease .15s both;">
+    <div class="card-title">
+      <div class="stat-mini-icon" style="background:#fee2e2;border:1px solid #fca5a5;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/></svg>
+      </div>
+      Things to Avoid
+      <span class="badge badge-red" style="margin-left:auto;">Harmful</span>
+    </div>
+    {% for item in data.avoid %}
+    <div class="list-item">
+      <div class="list-icon list-icon-red">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#dc2626" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </div>
+      {{ item }}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Precautions & Tips -->
+  <div class="section-card" style="animation:fadeUp .4s ease .2s both;">
+    <div class="card-title">
+      <div class="stat-mini-icon" style="background:#eff6ff;border:1px solid #bfdbfe;width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+      </div>
+      Precautions & Tips
+      <span class="badge badge-blue" style="margin-left:auto;">Important</span>
+    </div>
+    {% for tip in data.tips %}
+    <div class="list-item">
+      <div class="list-icon list-icon-blue">
+        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      </div>
+      {{ tip }}
+    </div>
+    {% endfor %}
+  </div>
+
+  <!-- Disclaimer -->
+  <div class="disclaimer" style="animation:fadeUp .4s ease .25s both;">
+    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;margin-top:1px;"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+    <p><strong>Medical Disclaimer:</strong> This information is AI-generated for educational purposes only. Always consult a qualified healthcare professional before making any medical decisions.</p>
+  </div>
+
+  <!-- Footer actions -->
+  <div style="display:flex;gap:12px;flex-wrap:wrap;animation:fadeUp .4s ease .3s both;">
+    <a href="/" class="btn-primary">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9.5 2A2.5 2.5 0 0 1 12 4.5v15a2.5 2.5 0 0 1-4.96.44 2.5 2.5 0 0 1-2.96-3.08 3 3 0 0 1-.34-5.58 2.5 2.5 0 0 1 1.32-4.24 2.5 2.5 0 0 1 1.44-4.04 2.5 2.5 0 0 1 3-3"/><path d="M14.5 2A2.5 2.5 0 0 0 12 4.5v15a2.5 2.5 0 0 0 4.96.44 2.5 2.5 0 0 0 2.96-3.08 3 3 0 0 0 .34-5.58 2.5 2.5 0 0 0-1.32-4.24 2.5 2.5 0 0 0-1.44-4.04 2.5 2.5 0 0 0-3-3"/></svg>
+      Check Another Disease
+    </a>
+    <a href="/dashboard" class="btn-ghost">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
+      View Dashboard
+    </a>
+  </div>
+
+</main>
+
+<footer style="border-top:1px solid #e2e8f0;padding:24px;text-align:center;margin-top:40px;">
+  <p style="font-size:.8125rem;color:#94a3b8;">© 2025 AI Healthcare · AI predictions are for informational purposes only · Always consult a qualified healthcare professional</p>
+</footer>
+
+</body>
+</html>
