@@ -19,7 +19,7 @@ AI-powered disease prediction and healthcare assistant system.
 - Tailwind CSS
 - Scikit-learn
 
-## Run Project
+## Run The Project
 
 ```bash
 pip install -r requirements.txt
